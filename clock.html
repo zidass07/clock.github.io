@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip Saat ve Tarih</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Press+Start+2P&display=swap');
+        
+        body {
+            background-color: transparent; /* Arka planı şeffaf yapar */
+            color: #ffffff; /* Yazı rengini beyaz yapar */
+            font-family: 'Bebas Neue', sans-serif; /* Yeni yazı tipi */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Okunurluğu artırmak için hafif gölge */
+            flex-direction: column; /* Öğeleri dikeyde sıralar */
+            gap: 10px; /* Saat ve tarih bloğu arasındaki boşluk */
+        }
+
+        .flip-clock {
+            display: flex;
+            gap: 15px; /* Haneler arasındaki boşluğu ayarlar */
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.4); /* Arka planı siyaha yakın bir tona getirir */
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .digit-group {
+            display: flex;
+        }
+
+        .digit {
+            position: relative;
+            width: 70px; /* Her bir hanenin genişliği */
+            height: 90px; /* Her bir hanenin yüksekliği */
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffffff; /* Rakam rengini beyaz yapar */
+            background-color: #1a1a1a; /* Rakam hanelerinin arka plan rengi siyah */
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .digit::before,
+        .digit::after {
+            content: attr(data-old); /* JavaScript ile güncellenecek eski değer */
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: center;
+            line-height: 90px;
+        }
+
+        .digit::before {
+            top: 0;
+            height: 50%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1;
+            transform-origin: bottom;
+        }
+        
+        .digit::after {
+            bottom: 0;
+            height: 50%;
+            line-height: 0;
+        }
+
+        .digit.flip-top::before {
+            animation: flip-top 0.5s ease-in-out forwards;
+        }
+
+        .digit.flip-bottom::after {
+            animation: flip-bottom 0.5s ease-in-out forwards;
+        }
+
+        @keyframes flip-top {
+            0% { transform: rotateX(0deg); content: attr(data-old); background-color: #1a1a1a; color: #ffffff; }
+            100% { transform: rotateX(-90deg); content: attr(data-old); background-color: #1a1a1a; color: #ffffff; }
+        }
+
+        @keyframes flip-bottom {
+            0% { transform: rotateX(90deg); content: attr(data-new); background-color: #1a1a1a; color: #ffffff; }
+            100% { transform: rotateX(0deg); content: attr(data-new); background-color: #1a1a1a; color: #ffffff; }
+        }
+
+        .info-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #000000; /* Metin rengi siyah */
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+            font-family: 'Press Start 2P', cursive; /* Tarih için pikselli yazı tipi */
+        }
+    </style>
+</head>
+<body>
+
+<div class="flip-clock">
+    <div class="digit-group" id="hours">
+        <div class="digit" data-old="0" data-new="0"></div>
+        <div class="digit" data-old="0" data-new="0"></div>
+    </div>
+    <div class="digit-group" id="minutes">
+        <div class="digit" data-old="0" data-new="0"></div>
+        <div class="digit" data-old="0" data-new="0"></div>
+    </div>
+    <div class="digit-group" id="seconds">
+        <div class="digit" data-old="0" data-new="0"></div>
+        <div class="digit" data-old="0" data-new="0"></div>
+    </div>
+</div>
+
+<div class="info-container">
+    <div class="info-item" id="date-display"></div>
+</div>
+
+<script>
+    
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        const hourDigits = hours.split('');
+        const minuteDigits = minutes.split('');
+        const secondDigits = seconds.split('');
+
+        
+        updateDigit(document.getElementById('hours').children[0], hourDigits[0]);
+        updateDigit(document.getElementById('hours').children[1], hourDigits[1]);
+        
+       
+        updateDigit(document.getElementById('minutes').children[0], minuteDigits[0]);
+        updateDigit(document.getElementById('minutes').children[1], minuteDigits[1]);
+
+        
+        updateDigit(document.getElementById('seconds').children[0], secondDigits[0]);
+        updateDigit(document.getElementById('seconds').children[1], secondDigits[1]);
+    }
+
+    
+    function updateDigit(digitElement, newDigit) {
+        const currentDigit = digitElement.getAttribute('data-old');
+
+       
+        if (currentDigit === newDigit) return;
+
+        
+        digitElement.setAttribute('data-old', currentDigit);
+        digitElement.setAttribute('data-new', newDigit);
+
+        
+        digitElement.classList.add('flip-top');
+
+        
+        setTimeout(() => {
+            digitElement.classList.add('flip-bottom');
+            // Animasyon bittiğinde sınıfları kaldır ve yeni değerleri ayarla
+            setTimeout(() => {
+                digitElement.classList.remove('flip-top', 'flip-bottom');
+                digitElement.setAttribute('data-old', newDigit);
+            }, 500); // CSS animasyon süresi kadar bekle
+        }, 250); // İlk animasyonun yarısında başlat
+    }
+
+   
+    function updateDate() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateString = now.toLocaleDateString('tr-TR', options);
+        document.getElementById('date-display').innerHTML = `<span>${dateString}</span>`;
+    }
+
+    // Saati ve tarihi başlat
+    updateClock();
+    updateDate();
+    setInterval(updateClock, 1000);
+    setInterval(updateDate, 60000); // Tarihi her dakika güncelle
+</script>
+
+</body>
+</html>
